@@ -1,20 +1,26 @@
 import { useCallback, useContext, useEffect, useMemo } from "react"
-import { Howl, HowlOptions } from "howler"
+import { Howl, Howler, HowlOptions } from "howler"
 import { playerContext } from "./context"
 import { AudioPlayerContext } from "./types"
 
 const noop = () => {}
 
-export type AudioPlayerControls = AudioPlayerContext & {
-    play: Howl["play"] | typeof noop
-    pause: Howl["pause"] | typeof noop
-    stop: Howl["stop"] | typeof noop
-    mute: Howl["mute"] | typeof noop
-    volume: Howl["volume"] | typeof noop
-    fade: Howl["fade"] | typeof noop
-    rate: Howl["rate"] | typeof noop
-    togglePlayPause: () => void
+export type AudioPlayerGlobal = {
+    ctx: typeof Howler.ctx
+    masterGain: typeof Howler.masterGain
 }
+
+export type AudioPlayerControls = AudioPlayerContext &
+    AudioPlayerGlobal & {
+        play: Howl["play"] | typeof noop
+        pause: Howl["pause"] | typeof noop
+        stop: Howl["stop"] | typeof noop
+        mute: Howl["mute"] | typeof noop
+        volume: Howl["volume"] | typeof noop
+        fade: Howl["fade"] | typeof noop
+        rate: Howl["rate"] | typeof noop
+        togglePlayPause: () => void
+    }
 
 export const useAudioPlayer = (options?: HowlOptions): AudioPlayerControls => {
     const { player, load, ...rest } = useContext(playerContext)!
@@ -57,7 +63,9 @@ export const useAudioPlayer = (options?: HowlOptions): AudioPlayerControls => {
             ...boundHowlerMethods,
             player,
             load,
-            togglePlayPause
+            togglePlayPause,
+            ctx: Howler.ctx,
+            masterGain: Howler.masterGain
         }
     }, [rest, player, boundHowlerMethods, load, togglePlayPause])
 }
